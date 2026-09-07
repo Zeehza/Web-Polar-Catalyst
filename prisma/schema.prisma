@@ -1,0 +1,137 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// Models
+// ============================================================
+
+/// Admin credential untuk dashboard. Single user, dibuat via seed.
+model Admin {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("admins")
+}
+
+/// Turnamen esports yang diselenggarakan Polar Catalyst.
+model Tournament {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  description String?   
+  game        String
+  status      String    @default("DRAFT")
+  bannerUrl   String?
+  startDate   DateTime
+  endDate     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  teams   Team[]
+  matches Match[]
+
+  // Indexes
+  @@index([status])
+  @@map("tournaments")
+}
+
+/// Tim peserta turnamen. Satu tim terdaftar di satu turnamen.
+model Team {
+  id           String     @id @default(cuid())
+  name         String
+  logoUrl      String?
+  tournamentId String
+  seed         Int?
+  status       String     @default("ACTIVE")
+  createdAt    DateTime   @default(now())
+
+  // Relations
+  tournament   Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  matchesAsA   Match[]    @relation("teamA")
+  matchesAsB   Match[]    @relation("teamB")
+  matchesWon   Match[]    @relation("winner")
+
+  // Indexes & Constraints
+  @@unique([tournamentId, name])
+  @@index([tournamentId])
+  @@map("teams")
+}
+
+/// Pertandingan dalam turnamen. Juga merepresentasikan posisi bracket
+/// via kombinasi roundNumber + matchOrder.
+model Match {
+  id           String      @id @default(cuid())
+  tournamentId String
+  roundNumber  Int
+  matchOrder   Int
+  teamAId      String?
+  teamBId      String?
+  scoreA       Int?
+  scoreB       Int?
+  winnerId     String?
+  status       String      @default("SCHEDULED")
+  scheduledAt  DateTime?
+  playedAt     DateTime?
+  notes        String?     
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  // Relations
+  tournament Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  teamA      Team?      @relation("teamA", fields: [teamAId], references: [id], onDelete: SetNull)
+  teamB      Team?      @relation("teamB", fields: [teamBId], references: [id], onDelete: SetNull)
+  winner     Team?      @relation("winner", fields: [winnerId], references: [id], onDelete: SetNull)
+
+  // Indexes & Constraints
+  @@unique([tournamentId, roundNumber, matchOrder])
+  @@index([tournamentId])
+  @@index([scheduledAt])
+  @@index([status])
+  @@map("matches")
+}
+
+/// Data sponsor untuk showcase di halaman publik.
+model Sponsor {
+  id           String      @id @default(cuid())
+  name         String
+  logoUrl      String
+  websiteUrl   String?
+  tier         String      @default("BRONZE")
+  displayOrder Int         @default(0)
+  isActive     Boolean     @default(true)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  // Indexes
+  @@index([isActive, displayOrder])
+  @@map("sponsors")
+}
+
+/// Form kontak dari calon sponsor. Disimpan di DB sebagai fallback
+/// kalau email/Discord gagal terkirim.
+model ContactSubmission {
+  id          String   @id @default(cuid())
+  name        String
+  company     String?
+  email       String
+  message     String   
+  emailSent   Boolean  @default(false)
+  discordSent Boolean  @default(false)
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  // Indexes
+  @@index([isRead])
+  @@index([createdAt])
+  @@map("contact_submissions")
+}
