@@ -135,9 +135,74 @@ export default async function HasilPage() {
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                    
-                    {/* LEADERBOARD (Kiri) */}
+                  {tournament.status === "COMPLETED" ? (
+                    <div className="flex flex-col items-center py-4">
+                      <div className="flex justify-center items-end gap-2 md:gap-6 pt-12 md:pt-16 w-full max-w-3xl border-b-2 border-neutral-200 dark:border-neutral-800 pb-0">
+                        {/* 2nd Place */}
+                        {leaderboard[1] && (
+                          <div className="flex flex-col items-center w-1/4 max-w-30 pb-0">
+                            {leaderboard[1].logoUrl ? (
+                              /* eslint-disable-next-line @next/next/no-img-element */
+                              <img src={leaderboard[1].logoUrl} alt={leaderboard[1].name} className="w-16 h-16 md:w-20 md:h-20 object-contain mb-3 drop-shadow-md" />
+                            ) : (
+                              <div className="w-16 h-16 md:w-20 md:h-20 bg-neutral-200 dark:bg-neutral-800 rounded flex items-center justify-center mb-3">?</div>
+                            )}
+                            <div className="text-center font-bold text-sm md:text-base text-neutral-800 dark:text-neutral-200 truncate w-full mb-2">{leaderboard[1].name}</div>
+                            <div className="w-full h-16 md:h-24 bg-neutral-300 dark:bg-neutral-700/80 mt-auto flex justify-center items-start pt-2 rounded-t-xl border border-b-0 border-neutral-400 dark:border-neutral-600">
+                              <div className="flex flex-col items-center gap-1">
+                                <Medal className="h-8 w-8 text-neutral-500 dark:text-neutral-400 drop-shadow-sm" />
+                                <span className="font-black text-2xl text-neutral-500/50">2</span>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* 1st Place */}
+                        {leaderboard[0] && (
+                          <div className="flex flex-col items-center w-1/3 max-w-40 z-10 pb-0">
+                            <div className="relative">
+                              <Trophy className="absolute -top-10 left-1/2 -translate-x-1/2 h-8 w-8 text-yellow-500" />
+                              {leaderboard[0].logoUrl ? (
+                                /* eslint-disable-next-line @next/next/no-img-element */
+                                <img src={leaderboard[0].logoUrl} alt={leaderboard[0].name} className="w-24 h-24 md:w-32 md:h-32 object-contain mb-3 filter drop-shadow-xl" />
+                              ) : (
+                                <div className="w-24 h-24 md:w-32 md:h-32 bg-neutral-200 dark:bg-neutral-800 rounded-full flex items-center justify-center mb-3">?</div>
+                              )}
+                            </div>
+                            <div className="text-center font-black text-lg md:text-xl text-brand-600 dark:text-brand-400 truncate w-full mb-2">{leaderboard[0].name}</div>
+                            <div className="w-full h-24 md:h-32 bg-linear-to-t from-brand-600 to-brand-400 mt-auto flex justify-center items-start pt-2 rounded-t-xl shadow-2xl border-t border-brand-300">
+                              <div className="flex flex-col items-center gap-1">
+                                <Medal className="h-10 w-10 text-yellow-300 drop-shadow-md" />
+                                <span className="font-black text-3xl text-white/50">1</span>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* 3rd Place */}
+                        {leaderboard[2] && (
+                          <div className="flex flex-col items-center w-1/4 max-w-30 pb-0">
+                            {leaderboard[2].logoUrl ? (
+                              /* eslint-disable-next-line @next/next/no-img-element */
+                              <img src={leaderboard[2].logoUrl} alt={leaderboard[2].name} className="w-16 h-16 md:w-20 md:h-20 object-contain mb-3 drop-shadow-md" />
+                            ) : (
+                              <div className="w-16 h-16 md:w-20 md:h-20 bg-neutral-200 dark:bg-neutral-800 rounded flex items-center justify-center mb-3">?</div>
+                            )}
+                            <div className="text-center font-bold text-sm md:text-base text-neutral-800 dark:text-neutral-200 truncate w-full mb-2">{leaderboard[2].name}</div>
+                            <div className="w-full h-12 md:h-16 bg-amber-700/60 dark:bg-amber-900/60 mt-auto flex justify-center items-start pt-2 rounded-t-xl border border-b-0 border-amber-600/50 dark:border-amber-700/50">
+                              <div className="flex flex-col items-center gap-1">
+                                <Medal className="h-8 w-8 text-amber-500 drop-shadow-sm" />
+                                <span className="font-black text-2xl text-amber-900/30 dark:text-amber-950/50">3</span>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                      
+                      {/* LEADERBOARD (Kiri) */}
                     <div className="lg:col-span-7 flex flex-col gap-4">
                       <div className="flex items-center gap-2 mb-2 text-xl font-bold text-neutral-900 dark:text-white">
                         <Hash className="h-5 w-5 text-brand-500" />
@@ -240,6 +305,7 @@ export default async function HasilPage() {
                     </div>
 
                   </div>
+                  )}
                 </div>
               );
             })}

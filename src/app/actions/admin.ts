@@ -54,6 +54,7 @@ export async function addTeam(formData: FormData) {
   try {
     const name = formData.get("name") as string;
     const tournamentId = formData.get("tournamentId") as string;
+    const logoUrl = formData.get("logoUrl") as string;
 
     if (!name || !tournamentId) {
       return { success: false, error: "Nama tim wajib diisi." };
@@ -63,6 +64,7 @@ export async function addTeam(formData: FormData) {
       data: {
         name,
         tournamentId,
+        logoUrl: logoUrl || null,
       },
     });
 
@@ -109,6 +111,7 @@ export async function updateMatchResult(matchId: string, data: {
   scoreB: number | null;
   winnerId: string | null;
   status: string;
+  scheduledAt?: string | null;
 }) {
   try {
     const match = await prisma.match.findUnique({ where: { id: matchId } });
@@ -121,6 +124,7 @@ export async function updateMatchResult(matchId: string, data: {
         scoreB: data.scoreB,
         winnerId: data.winnerId,
         status: data.status,
+        scheduledAt: data.scheduledAt ? new Date(data.scheduledAt) : null,
         playedAt: data.status === "COMPLETED" && match.status !== "COMPLETED" ? new Date() : undefined,
       }
     });

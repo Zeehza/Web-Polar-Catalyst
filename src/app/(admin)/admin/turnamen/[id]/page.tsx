@@ -10,6 +10,7 @@ import {
   Trash2,
 } from "lucide-react";
 import Link from "next/link";
+import { FormWithToast, InnerButton } from "@/components/SubmitButton";
 import {
   updateTournamentStatus,
   addTeam,
@@ -55,16 +56,37 @@ export default async function TournamentDetailPage({
   const handleMatchUpdate = async (formData: FormData) => {
     "use server";
     const matchId = formData.get("matchId") as string;
+    const teamAId = (formData.get("teamAId") as string) || null;
+    const teamBId = (formData.get("teamBId") as string) || null;
     const scoreA = formData.get("scoreA")
       ? parseInt(formData.get("scoreA") as string)
       : null;
     const scoreB = formData.get("scoreB")
       ? parseInt(formData.get("scoreB") as string)
       : null;
-    const winnerId = (formData.get("winnerId") as string) || null;
     const status = formData.get("status") as string;
+    const scheduledAt = (formData.get("scheduledAt") as string) || null;
 
-    await updateMatchResult(matchId, { scoreA, scoreB, winnerId, status });
+    // Auto-determine winner from scores
+    let winnerId: string | null = null;
+    if (scoreA !== null && scoreB !== null) {
+      if (scoreA > scoreB && teamAId) winnerId = teamAId;
+      else if (scoreB > scoreA && teamBId) winnerId = teamBId;
+    }
+
+    await updateMatchResult(matchId, {
+      scoreA,
+      scoreB,
+      winnerId,
+      status,
+      scheduledAt,
+    });
+  };
+
+  const formatDatetimeLocal = (date: Date | null) => {
+    if (!date) return "";
+    const offset = date.getTimezoneOffset() * 60000;
+    return new Date(date.getTime() - offset).toISOString().slice(0, 16);
   };
 
   return (
@@ -113,7 +135,11 @@ export default async function TournamentDetailPage({
             <h2 className="text-lg font-bold mb-4 dark:text-white">
               Status Turnamen
             </h2>
-            <form action={handleStatusUpdate} className="flex flex-col gap-4">
+            <FormWithToast
+              action={handleStatusUpdate}
+              className="flex flex-col gap-4"
+              toastMessage="Status turnamen terupdate!"
+            >
               <select
                 name="status"
                 defaultValue={tournament.status}
@@ -124,13 +150,10 @@ export default async function TournamentDetailPage({
                 <option value="COMPLETED">COMPLETED</option>
                 <option value="CANCELLED">CANCELLED</option>
               </select>
-              <button
-                type="submit"
-                className="w-full bg-brand-500 hover:bg-brand-600 text-white py-2.5 rounded-xl font-medium flex items-center justify-center gap-2"
-              >
+              <InnerButton className="w-full bg-brand-500 hover:bg-brand-600 text-white py-2.5 rounded-xl font-medium flex items-center justify-center gap-2">
                 <Save className="h-4 w-4" /> Update Status
-              </button>
-            </form>
+              </InnerButton>
+            </FormWithToast>
           </div>
 
           {/* Manage Teams */}
@@ -152,16 +175,24 @@ export default async function TournamentDetailPage({
               className="flex gap-2 mb-4"
             >
               <input type="hidden" name="tournamentId" value={id} />
-              <input
-                type="text"
-                name="name"
-                placeholder="Nama tim baru..."
-                required
-                className="flex-1 px-3 py-2 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-lg outline-none text-sm dark:text-white"
-              />
+              <div className="flex flex-col gap-2 flex-1">
+                <input
+                  type="text"
+                  name="name"
+                  placeholder="Nama tim baru..."
+                  required
+                  className="px-3 py-2 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-lg outline-none text-sm dark:text-white"
+                />
+                <input
+                  type="url"
+                  name="logoUrl"
+                  placeholder="URL Logo (Opsional)"
+                  className="px-3 py-2 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-lg outline-none text-sm dark:text-white"
+                />
+              </div>
               <button
                 type="submit"
-                className="bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-3 py-2 rounded-lg hover:opacity-80 transition-opacity"
+                className="bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-3 py-2 rounded-lg hover:opacity-80 transition-opacity flex items-center justify-center self-end h-21"
               >
                 <Plus className="h-4 w-4" />
               </button>
@@ -179,7 +210,21 @@ export default async function TournamentDetailPage({
                       key={team.id}
                       className="px-3 py-2 text-sm bg-neutral-50 dark:bg-neutral-950 rounded-lg dark:text-neutral-300 font-medium flex items-center justify-between group"
                     >
-                      <span>{team.name}</span>
+                      <div className="flex items-center gap-2">
+                        {team.logoUrl ? (
+                          /* eslint-disable-next-line @next/next/no-img-element */
+                          <img
+                            src={team.logoUrl}
+                            alt={team.name}
+                            className="w-6 h-6 object-contain"
+                          />
+                        ) : (
+                          <div className="w-6 h-6 bg-neutral-200 dark:bg-neutral-800 rounded flex items-center justify-center text-[10px]">
+                            ?
+                          </div>
+                        )}
+                        <span>{team.name}</span>
+                      </div>
                       <form
                         action={async (formData) => {
                           "use server";
@@ -224,7 +269,7 @@ export default async function TournamentDetailPage({
               <input type="hidden" name="tournamentId" value={id} />
               <div className="flex flex-col gap-1 flex-1 min-w-25">
                 <label className="text-xs font-semibold text-neutral-500">
-                  Round
+                  Game
                 </label>
                 <input
                   type="number"
@@ -237,7 +282,7 @@ export default async function TournamentDetailPage({
               </div>
               <div className="flex flex-col gap-1 flex-1 min-w-25">
                 <label className="text-xs font-semibold text-neutral-500">
-                  Urutan (Order)
+                  Match
                 </label>
                 <input
                   type="number"
@@ -280,6 +325,16 @@ export default async function TournamentDetailPage({
                   ))}
                 </select>
               </div>
+              <div className="flex flex-col gap-1 flex-1 min-w-37.5">
+                <label className="text-xs font-semibold text-neutral-500">
+                  Waktu (Opsional)
+                </label>
+                <input
+                  type="datetime-local"
+                  name="scheduledAt"
+                  className="px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 outline-none text-sm dark:text-white"
+                />
+              </div>
               <button
                 type="submit"
                 className="bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-4 py-2 rounded-lg hover:opacity-80 transition-opacity font-medium text-sm flex items-center gap-2"
@@ -296,73 +351,68 @@ export default async function TournamentDetailPage({
                 </p>
               ) : (
                 tournament.matches.map((match) => (
-                  <div
-                    key={match.id}
-                    className="flex flex-col md:flex-row items-center gap-2"
-                  >
-                    <form
+                  <div key={match.id} className="flex items-start gap-2">
+                    <FormWithToast
                       action={handleMatchUpdate}
-                      className="flex-1 flex flex-col md:flex-row items-center gap-4 p-4 border border-neutral-100 dark:border-neutral-800 rounded-xl bg-white dark:bg-neutral-900 hover:border-brand-300 dark:hover:border-brand-700 transition-colors"
+                      className="flex-1 p-4 border border-neutral-100 dark:border-neutral-800 rounded-xl bg-white dark:bg-neutral-900 hover:border-brand-300 dark:hover:border-brand-700 transition-colors"
+                      toastMessage="Match diperbarui!"
                     >
                       <input type="hidden" name="matchId" value={match.id} />
+                      <input
+                        type="hidden"
+                        name="teamAId"
+                        value={match.teamAId || ""}
+                      />
+                      <input
+                        type="hidden"
+                        name="teamBId"
+                        value={match.teamBId || ""}
+                      />
 
-                      <div className="flex items-center justify-center bg-neutral-100 dark:bg-neutral-800 rounded-lg px-3 py-2 font-mono text-xs font-bold w-full md:w-auto">
-                        R{match.roundNumber} - M{match.matchOrder}
-                      </div>
+                      {/* Row 1: Match info + Teams + Scores */}
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="bg-neutral-100 dark:bg-neutral-800 rounded-lg px-2.5 py-1.5 font-mono text-xs font-bold shrink-0">
+                          R{match.roundNumber}-M{match.matchOrder}
+                        </div>
 
-                      <div className="flex-1 flex items-center justify-between gap-4 w-full">
-                        <div className="flex flex-col items-end flex-1">
+                        <div className="flex-1 flex items-center gap-2 min-w-0">
                           <span
-                            className={`text-sm font-semibold truncate ${match.winnerId === match.teamAId ? "text-brand-500" : "dark:text-white"}`}
+                            className={`text-sm font-semibold truncate flex-1 text-right ${match.winnerId === match.teamAId ? "text-brand-500" : "dark:text-white"}`}
                           >
                             {match.teamA?.name || "TBD"}
                           </span>
-                        </div>
-
-                        <div className="flex items-center gap-2">
                           <input
                             type="number"
                             name="scoreA"
                             defaultValue={match.scoreA ?? ""}
-                            className="w-12 px-2 py-1 text-center rounded border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-950 dark:text-white outline-none"
+                            className="w-11 px-1 py-1 text-center text-sm rounded border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-950 dark:text-white outline-none shrink-0"
                           />
-                          <span className="text-neutral-400 font-bold">-</span>
+                          <span className="text-neutral-400 font-bold text-xs shrink-0">
+                            vs
+                          </span>
                           <input
                             type="number"
                             name="scoreB"
                             defaultValue={match.scoreB ?? ""}
-                            className="w-12 px-2 py-1 text-center rounded border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-950 dark:text-white outline-none"
+                            className="w-11 px-1 py-1 text-center text-sm rounded border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-950 dark:text-white outline-none shrink-0"
                           />
-                        </div>
-
-                        <div className="flex flex-col items-start flex-1">
                           <span
-                            className={`text-sm font-semibold truncate ${match.winnerId === match.teamBId ? "text-brand-500" : "dark:text-white"}`}
+                            className={`text-sm font-semibold truncate flex-1 ${match.winnerId === match.teamBId ? "text-brand-500" : "dark:text-white"}`}
                           >
                             {match.teamB?.name || "TBD"}
                           </span>
                         </div>
                       </div>
 
-                      <div className="flex flex-wrap items-center gap-2 w-full md:w-auto justify-between md:justify-start">
-                        <select
-                          name="winnerId"
-                          defaultValue={match.winnerId || ""}
-                          className="px-2 py-1 text-xs rounded border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-950 dark:text-white outline-none"
-                        >
-                          <option value="">No Winner Yet</option>
-                          {match.teamAId && (
-                            <option value={match.teamAId}>
-                              {match.teamA?.name}
-                            </option>
-                          )}
-                          {match.teamBId && (
-                            <option value={match.teamBId}>
-                              {match.teamB?.name}
-                            </option>
-                          )}
-                        </select>
-
+                      {/* Row 2: Controls */}
+                      <div className="flex items-center gap-2 pt-3 border-t border-neutral-100 dark:border-neutral-800">
+                        <input
+                          type="datetime-local"
+                          name="scheduledAt"
+                          defaultValue={formatDatetimeLocal(match.scheduledAt)}
+                          title="Waktu (Kosong = TBA)"
+                          className="flex-1 min-w-0 px-2 py-1 text-xs rounded border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-950 dark:text-white outline-none"
+                        />
                         <select
                           name="status"
                           defaultValue={match.status}
@@ -372,21 +422,20 @@ export default async function TournamentDetailPage({
                           <option value="ONGOING">ONGOING</option>
                           <option value="COMPLETED">COMPLETED</option>
                         </select>
-
-                        <button
-                          type="submit"
-                          className="bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-neutral-900 dark:text-white p-1.5 rounded-md transition-colors"
+                        <InnerButton
+                          className="bg-brand-500 hover:bg-brand-600 text-white p-1.5 rounded-md transition-colors"
                           title="Simpan Perubahan"
                         >
                           <Check className="h-4 w-4" />
-                        </button>
+                        </InnerButton>
                       </div>
-                    </form>
+                    </FormWithToast>
                     <form
                       action={async (formData) => {
                         "use server";
                         await deleteMatch(formData);
                       }}
+                      className="pt-4"
                     >
                       <input type="hidden" name="matchId" value={match.id} />
                       <input type="hidden" name="tournamentId" value={id} />
