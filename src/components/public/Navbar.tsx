@@ -16,7 +16,7 @@ export function Navbar() {
               className="rounded-full bg-transparent dark:invert"
               suppressHydrationWarning
             />
-            <span className="text-xl font-bold tracking-tight text-brand-500 dark:text-brand-400">
+            <span className="text-xl font-bold tracking-tight text-neutral-900 dark:text-white">
               Polar Catalyst
             </span>
           </Link>

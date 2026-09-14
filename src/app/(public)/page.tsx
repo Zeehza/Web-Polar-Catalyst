@@ -6,7 +6,7 @@ export default function LandingPage() {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="relative flex flex-col items-center justify-center px-4 py-32 text-center md:py-48 bg-linear-to-b from-brand-50/50 to-white dark:from-brand-950/30 dark:to-neutral-950 overflow-hidden">
+      <section className="relative flex flex-col items-center justify-center px-4 pt-32 pb-48 text-center md:pt-48 md:pb-64 bg-linear-to-b from-brand-50/50 to-white dark:from-brand-950/30 dark:to-neutral-950 overflow-hidden">
         <div className="absolute inset-0 z-0 bg-grid-black/[0.02] dark:bg-grid-white/[0.02] bg-size-[32px_32px]" />
 
         {/* Catalyst Logo Background */}
@@ -22,31 +22,17 @@ export default function LandingPage() {
 
         <div className="relative z-10 flex max-w-200 flex-col items-center gap-6 pt-4">
           <h1 className="text-5xl font-extrabold tracking-tight text-neutral-900 dark:text-white sm:text-6xl md:text-7xl">
-            Pusat Komunitas <br className="hidden sm:block" />
-            <span className="text-transparent bg-clip-text bg-linear-to-r from-brand-500 to-brand-300">
-              Fanbase Vtuber Indonesia
-            </span>
+            POLAR CATALYST
           </h1>
+          <h2 className="text-lg font-semibold tracking-wide text-transparent bg-clip-text bg-linear-to-r from-brand-500 to-brand-300 sm:text-xl md:text-4xl">
+            Community Organizer & Creative Marketing Collective
+          </h2>
 
           <p className="max-w-150 text-lg text-neutral-600 dark:text-neutral-400 md:text-xl">
-            Platform komunitas resmi untuk komunitas vtuber indonesia.
+            From Community To Community For Community
+            <br />
+            <i>&quot;We Don&apos;t Follow The Crowd, We Move It.&quot;</i>
           </p>
-
-          <div className="mt-4 flex flex-col gap-4 sm:flex-row">
-            <Link
-              href="/events"
-              className="inline-flex h-12 items-center justify-center rounded-full bg-brand-500 px-8 text-sm font-medium text-white shadow-lg shadow-brand-500/20 transition-all hover:bg-brand-600 hover:scale-105 active:scale-95"
-            >
-              Lihat Jadwal
-              <ArrowRight className="ml-2 h-4 w-4" suppressHydrationWarning />
-            </Link>
-            <Link
-              href="/contact"
-              className="inline-flex h-12 items-center justify-center rounded-full border border-neutral-200 bg-white px-8 text-sm font-medium text-neutral-900 transition-all hover:bg-neutral-50 hover:scale-105 active:scale-95 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-50 dark:hover:bg-neutral-800"
-            >
-              Hubungi Kami
-            </Link>
-          </div>
         </div>
       </section>
 
@@ -57,10 +43,19 @@ export default function LandingPage() {
             Latar Belakang
           </div>
           <h2 className="text-3xl font-bold tracking-tight md:text-4xl text-neutral-900 dark:text-white">
-            Mengapa <span className="text-transparent bg-clip-text bg-linear-to-r from-brand-500 to-brand-400">Polar Catalyst</span> Hadir?
+            Apa itu{" "}
+            <span className="text-transparent bg-clip-text bg-linear-to-r from-brand-500 to-brand-400">
+              Polar Catalyst
+            </span>{" "}
+            ?
           </h2>
           <p className="text-lg text-neutral-600 dark:text-neutral-400 leading-relaxed">
-            Dunia Virtual YouTuber (VTuber) di Indonesia terus berkembang pesat. Namun, seringkali komunitas dan fandom tersebar di berbagai platform tanpa adanya pusat informasi yang terintegrasi. Polar Catalyst hadir dari semangat untuk menyatukan berbagai elemen ini, menciptakan ekosistem yang suportif, kompetitif, dan kolaboratif bagi seluruh penikmat budaya pop virtual di tanah air.
+            Polar Catalyst adalah Community Organizer dan kolektif kreatif yang
+            berfokus pada pengembangan komunitas, penciptaan pengalaman, dan
+            strategi marketing kreatif, Kami hadir untuk menghidupkan komunitas,
+            menghadirkan pengalaman yang berbeda, dan mengubah ide-ide yang
+            tidak terpikirkan sebelumnya menjadi sesuatu yang nyata dan
+            berdampak.
           </p>
         </div>
       </section>
@@ -76,8 +71,8 @@ export default function LandingPage() {
               Live Leaderboard
             </h3>
             <p className="text-neutral-600 dark:text-neutral-400">
-              Pantau pergerakan bracket dan hasil turnamen terbaru secara akurat
-              dan transparan.
+              Pantau pergerakan bracket dan hasil turnamen secara real-time
+              transparan saat event berjalan.
             </p>
           </div>
 
@@ -86,11 +81,11 @@ export default function LandingPage() {
               <Calendar className="h-6 w-6" suppressHydrationWarning />
             </div>
             <h3 className="mb-2 text-xl font-bold dark:text-white">
-              Jadwal Terpusat
+              Jadwal Event
             </h3>
             <p className="text-neutral-600 dark:text-neutral-400">
-              Tidak ada lagi kebingungan. Semua jadwal event dan match tersedia
-              di satu tempat.
+              Jangan lewatkan setiap match! Cek jadwal event yang sedang
+              berjalan.
             </p>
           </div>
 
@@ -99,11 +94,11 @@ export default function LandingPage() {
               <Users className="h-6 w-6" suppressHydrationWarning />
             </div>
             <h3 className="mb-2 text-xl font-bold dark:text-white">
-              Komunitas Solid
+              Community Support
             </h3>
             <p className="text-neutral-600 dark:text-neutral-400">
-              Bergabung dengan ribuan fandom dan dukung vtuber favoritmu meraih
-              juara.
+              Bergabung dengan para penggemar Vtuber dari berbagai tempat dan
+              dukung komunitasmu agar Juara.
             </p>
           </div>
         </div>
@@ -123,35 +118,34 @@ export default function LandingPage() {
           </div>
           <div className="w-full md:w-1/2 space-y-6">
             <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
-              Lebih dari sekadar{" "}
+              Explore Our{" "}
               <span className="text-transparent bg-clip-text bg-linear-to-r from-brand-500 to-brand-400">
-                Komunitas
+                Event
               </span>
             </h2>
             <p className="text-lg text-neutral-600 dark:text-neutral-400">
               Polar Catalyst hadir sebagai wadah pemersatu bagi para penggemar
-              dan kreator Vtuber di Indonesia. Kami menyelenggarakan berbagai
-              turnamen kompetitif, event komunitas, dan aktivitas kolaboratif
-              lainnya.
+              Virtual di Indonesia. Kami menyelenggarakan berbagai turnamen
+              kompetitif, event komunitas, dan aktivitas kolaboratif lainnya.
             </p>
             <ul className="space-y-4 text-neutral-700 dark:text-neutral-300">
               <li className="flex items-center gap-3">
                 <div className="rounded-full bg-brand-100 p-1 text-brand-600 dark:bg-brand-900/30 dark:text-brand-400">
                   <ArrowRight className="h-4 w-4" suppressHydrationWarning />
                 </div>
-                <span>Turnamen E-Sports Profesional</span>
+                <span>Fandom Clash Arena</span>
               </li>
               <li className="flex items-center gap-3">
                 <div className="rounded-full bg-brand-100 p-1 text-brand-600 dark:bg-brand-900/30 dark:text-brand-400">
                   <ArrowRight className="h-4 w-4" suppressHydrationWarning />
                 </div>
-                <span>Event Nobar (Watchalong) Skala Besar</span>
+                <span>Chill and Talk</span>
               </li>
               <li className="flex items-center gap-3">
                 <div className="rounded-full bg-brand-100 p-1 text-brand-600 dark:bg-brand-900/30 dark:text-brand-400">
                   <ArrowRight className="h-4 w-4" suppressHydrationWarning />
                 </div>
-                <span>Kolaborasi Antar Fandom & Agency</span>
+                <span>Random Giveaway</span>
               </li>
             </ul>
           </div>
@@ -167,24 +161,25 @@ export default function LandingPage() {
 
         <div className="relative z-10 container mx-auto px-4 md:px-8 flex flex-col items-center">
           <h2 className="mb-6 text-3xl font-bold tracking-tight text-white md:text-5xl">
-            Siap untuk Meramaikan?
+            The Crowd Is Waiting, Come Join the Catalyst
           </h2>
           <p className="mb-10 max-w-2xl text-lg text-brand-200">
-            Jadilah bagian dari revolusi komunitas Vtuber Indonesia. Ikuti
-            turnamen, dukung Oshi kamu, dan temukan teman baru!
+            Sebuah event tidak akan hidup tanpa orang-orang di baliknya dan
+            Sebuah komunitas tidak akan bergerak tanpa mereka yang berani
+            menjadi pemicunya. Bergabunglah dengan kami.
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
             <Link
-              href="/register"
+              href="/contact"
               className="inline-flex h-12 items-center justify-center rounded-full bg-white px-8 text-sm font-medium text-brand-950 shadow-lg transition-all hover:bg-neutral-100 hover:scale-105 active:scale-95"
             >
-              Gabung Sekarang
+              Punya Saran?
             </Link>
             <Link
-              href="/discord"
+              href="https://discord.gg/Wb4eMan7rg"
               className="inline-flex h-12 items-center justify-center rounded-full border border-brand-800 bg-brand-900/50 px-8 text-sm font-medium text-white transition-all hover:bg-brand-800 hover:scale-105 active:scale-95"
             >
-              Join Discord Server
+              Bergabung Sekarang
             </Link>
           </div>
         </div>

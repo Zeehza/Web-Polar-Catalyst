@@ -17,35 +17,50 @@ export function Footer() {
                 className="rounded-full bg-transparent dark:invert"
                 suppressHydrationWarning
               />
-              <span className="text-xl font-bold tracking-tight text-brand-500 dark:text-brand-400">
+              <span className="text-xl font-bold tracking-tight text-neutral-900 dark:text-white">
                 Polar Catalyst
               </span>
             </Link>
             <p className="text-center text-sm text-neutral-500 dark:text-neutral-400 md:text-left">
-              Pusat turnamen dan event vtuber profesional.
+              <i>&quot;We Don&apos;t Follow The Crowd, We Move It.&quot;</i>
             </p>
           </div>
-          
+
           <div className="flex flex-col items-center gap-4 md:items-end">
             <div className="flex gap-4">
-              <Link href="#" className="text-neutral-500 transition-colors hover:text-brand-500 dark:text-neutral-400 dark:hover:text-brand-400">
+              <Link
+                href="https://discord.gg/Wb4eMan7rg"
+                className="text-neutral-500 transition-colors hover:text-brand-500 dark:text-neutral-400 dark:hover:text-brand-400"
+              >
                 <FaDiscord className="h-5 w-5" suppressHydrationWarning />
                 <span className="sr-only">Discord</span>
               </Link>
-              <Link href="#" className="text-neutral-500 transition-colors hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100">
+              <Link
+                href="#"
+                className="text-neutral-500 transition-colors hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100"
+              >
                 <FaXTwitter className="h-5 w-5" suppressHydrationWarning />
                 <span className="sr-only">X (Twitter)</span>
               </Link>
-              <Link href="#" className="text-neutral-500 transition-colors hover:text-pink-500 dark:text-neutral-400 dark:hover:text-pink-400">
+              <Link
+                href="#"
+                className="text-neutral-500 transition-colors hover:text-pink-500 dark:text-neutral-400 dark:hover:text-pink-400"
+              >
                 <FaInstagram className="h-5 w-5" suppressHydrationWarning />
                 <span className="sr-only">Instagram</span>
               </Link>
-              <Link href="#" className="text-neutral-500 transition-colors hover:text-red-500 dark:text-neutral-400 dark:hover:text-red-400">
+              <Link
+                href="#"
+                className="text-neutral-500 transition-colors hover:text-red-500 dark:text-neutral-400 dark:hover:text-red-400"
+              >
                 <FaYoutube className="h-5 w-5" suppressHydrationWarning />
                 <span className="sr-only">YouTube</span>
               </Link>
             </div>
-            <p className="text-sm text-neutral-500 dark:text-neutral-400" suppressHydrationWarning>
+            <p
+              className="text-sm text-neutral-500 dark:text-neutral-400"
+              suppressHydrationWarning
+            >
               © {new Date().getFullYear()} Polar Catalyst. All rights reserved.
             </p>
           </div>
