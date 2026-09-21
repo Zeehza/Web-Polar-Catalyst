@@ -7,10 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ============================================================
-// Models
-// ============================================================
-
 /// Admin credential untuk dashboard. Single user, dibuat via seed.
 model Admin {
   id           String   @id @default(cuid())
@@ -100,22 +96,6 @@ model Match {
   @@map("matches")
 }
 
-/// Data sponsor untuk showcase di halaman publik.
-model Sponsor {
-  id           String      @id @default(cuid())
-  name         String
-  logoUrl      String
-  websiteUrl   String?
-  tier         String      @default("BRONZE")
-  displayOrder Int         @default(0)
-  isActive     Boolean     @default(true)
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
-
-  // Indexes
-  @@index([isActive, displayOrder])
-  @@map("sponsors")
-}
 
 /// Form kontak dari calon sponsor. Disimpan di DB sebagai fallback
 /// kalau email/Discord gagal terkirim.

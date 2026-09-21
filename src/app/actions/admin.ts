@@ -2,9 +2,10 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { withAdminActionError } from "@/lib/action-utils";
 
 export async function createTournament(prevState: unknown, formData: FormData) {
-  try {
+  return withAdminActionError("creating tournament", "Gagal membuat turnamen.", async () => {
     const name = formData.get("name") as string;
     const game = formData.get("game") as string;
     const startDateStr = formData.get("startDate") as string;
@@ -28,14 +29,11 @@ export async function createTournament(prevState: unknown, formData: FormData) {
     revalidatePath("/admin/turnamen");
     revalidatePath("/events");
     return { success: true, redirect: "/admin/turnamen" };
-  } catch (error) {
-    console.error("Error creating tournament:", error);
-    return { success: false, error: "Gagal membuat turnamen." };
-  }
+  });
 }
 
 export async function updateTournamentStatus(id: string, status: string) {
-  try {
+  return withAdminActionError("updating tournament status", "Gagal mengubah status turnamen.", async () => {
     await prisma.tournament.update({
       where: { id },
       data: { status },
@@ -44,14 +42,11 @@ export async function updateTournamentStatus(id: string, status: string) {
     revalidatePath("/events");
     revalidatePath("/results");
     return { success: true };
-  } catch (error) {
-    console.error("Error updating tournament status:", error);
-    return { success: false, error: "Gagal mengubah status turnamen." };
-  }
+  });
 }
 
 export async function addTeam(formData: FormData) {
-  try {
+  return withAdminActionError("adding team", "Gagal menambahkan tim.", async () => {
     const name = formData.get("name") as string;
     const tournamentId = formData.get("tournamentId") as string;
     const logoUrl = formData.get("logoUrl") as string;
@@ -70,14 +65,11 @@ export async function addTeam(formData: FormData) {
 
     revalidatePath(`/admin/turnamen/${tournamentId}`);
     return { success: true, message: "Tim berhasil ditambahkan." };
-  } catch (error) {
-    console.error("Error adding team:", error);
-    return { success: false, error: "Gagal menambahkan tim." };
-  }
+  });
 }
 
 export async function addMatch(formData: FormData) {
-  try {
+  return withAdminActionError("adding match", "Gagal menambahkan match (pastikan Round & Order unik).", async () => {
     const tournamentId = formData.get("tournamentId") as string;
     const roundNumber = parseInt(formData.get("roundNumber") as string);
     const matchOrder = parseInt(formData.get("matchOrder") as string);
@@ -100,10 +92,7 @@ export async function addMatch(formData: FormData) {
     revalidatePath(`/admin/turnamen/${tournamentId}`);
     revalidatePath("/events");
     return { success: true, message: "Match berhasil ditambahkan." };
-  } catch (error) {
-    console.error("Error adding match:", error);
-    return { success: false, error: "Gagal menambahkan match (pastikan Round & Order unik)." };
-  }
+  });
 }
 
 export async function updateMatchResult(matchId: string, data: {
@@ -113,9 +102,18 @@ export async function updateMatchResult(matchId: string, data: {
   status: string;
   scheduledAt?: string | null;
 }) {
-  try {
+  return withAdminActionError("updating match", "Gagal memperbarui match.", async () => {
     const match = await prisma.match.findUnique({ where: { id: matchId } });
     if (!match) throw new Error("Match not found");
+
+    if (data.status === "COMPLETED" && data.scoreA !== null && data.scoreB !== null) {
+      if (data.scoreA > data.scoreB && data.winnerId !== match.teamAId) {
+        throw new Error("Score mismatch: Team A has higher score but is not the winner.");
+      }
+      if (data.scoreB > data.scoreA && data.winnerId !== match.teamBId) {
+        throw new Error("Score mismatch: Team B has higher score but is not the winner.");
+      }
+    }
 
     await prisma.match.update({
       where: { id: matchId },
@@ -133,46 +131,34 @@ export async function updateMatchResult(matchId: string, data: {
     revalidatePath("/events");
     revalidatePath("/results");
     return { success: true };
-  } catch (error) {
-    console.error("Error updating match:", error);
-    return { success: false, error: "Gagal memperbarui match." };
-  }
+  });
 }
 
 export async function deleteTeam(formData: FormData) {
-  try {
+  return withAdminActionError("deleting team", "Gagal menghapus tim.", async () => {
     const teamId = formData.get("teamId") as string;
     const tournamentId = formData.get("tournamentId") as string;
     await prisma.team.delete({ where: { id: teamId } });
     revalidatePath(`/admin/turnamen/${tournamentId}`);
     return { success: true };
-  } catch (error) {
-    console.error("Error deleting team:", error);
-    return { success: false, error: "Gagal menghapus tim." };
-  }
+  });
 }
 
 export async function deleteMatch(formData: FormData) {
-  try {
+  return withAdminActionError("deleting match", "Gagal menghapus match.", async () => {
     const matchId = formData.get("matchId") as string;
     const tournamentId = formData.get("tournamentId") as string;
     await prisma.match.delete({ where: { id: matchId } });
     revalidatePath(`/admin/turnamen/${tournamentId}`);
     return { success: true };
-  } catch (error) {
-    console.error("Error deleting match:", error);
-    return { success: false, error: "Gagal menghapus match." };
-  }
+  });
 }
 
 export async function deleteTournament(formData: FormData) {
-  try {
+  return withAdminActionError("deleting tournament", "Gagal menghapus turnamen.", async () => {
     const tournamentId = formData.get("tournamentId") as string;
     await prisma.tournament.delete({ where: { id: tournamentId } });
     revalidatePath("/admin/turnamen");
     return { success: true };
-  } catch (error) {
-    console.error("Error deleting tournament:", error);
-    return { success: false, error: "Gagal menghapus turnamen." };
-  }
+  });
 }

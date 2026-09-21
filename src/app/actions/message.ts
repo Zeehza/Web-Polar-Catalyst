@@ -2,9 +2,10 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { withAdminActionError } from "@/lib/action-utils";
 
-export async function markMessageAsRead(formData: FormData): Promise<void> {
-  try {
+export async function markMessageAsRead(formData: FormData) {
+  await withAdminActionError("marking message as read", "Gagal menandai pesan dibaca.", async () => {
     const messageId = formData.get("messageId") as string;
     if (!messageId) return;
 
@@ -15,13 +16,11 @@ export async function markMessageAsRead(formData: FormData): Promise<void> {
 
     revalidatePath("/admin/pesan");
     revalidatePath("/admin"); // Revalidate dashboard if it shows unread count
-  } catch (error) {
-    console.error("Error marking message as read:", error);
-  }
+  });
 }
 
-export async function deleteMessage(formData: FormData): Promise<void> {
-  try {
+export async function deleteMessage(formData: FormData) {
+  await withAdminActionError("deleting message", "Gagal menghapus pesan.", async () => {
     const messageId = formData.get("messageId") as string;
     if (!messageId) return;
 
@@ -31,7 +30,5 @@ export async function deleteMessage(formData: FormData): Promise<void> {
 
     revalidatePath("/admin/pesan");
     revalidatePath("/admin");
-  } catch (error) {
-    console.error("Error deleting message:", error);
-  }
+  });
 }

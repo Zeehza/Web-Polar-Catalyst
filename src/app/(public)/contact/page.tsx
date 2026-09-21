@@ -20,7 +20,7 @@ export default function KontakPage() {
 
   // Auto scroll ke pesan jika ada respon (success/error)
   useEffect(() => {
-    if (state?.message || state?.error) {
+    if (state !== null) {
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
   }, [state]);

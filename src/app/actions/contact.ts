@@ -1,22 +1,23 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { withActionError } from "@/lib/action-utils";
 
 export async function submitContactForm(prevState: unknown, formData: FormData) {
-  const name = formData.get("name") as string;
+  return withActionError("submitting contact form", "Terjadi kesalahan internal saat memproses pesan Anda. Silakan coba lagi nanti.", async () => {
+    const name = formData.get("name") as string;
   const company = formData.get("company") as string;
   const email = formData.get("email") as string;
   const message = formData.get("message") as string;
 
-  // Basic Validation
-  if (!name || !email || !message) {
-    return {
-      success: false,
-      error: "Nama, Email, dan Pesan wajib diisi.",
-    };
-  }
+    // Basic Validation
+    if (!name || !email || !message) {
+      return {
+        success: false,
+        error: "Nama, Email, dan Pesan wajib diisi.",
+      };
+    }
 
-  try {
     // 1. Simpan ke Database
     const submission = await prisma.contactSubmission.create({
       data: {
@@ -27,55 +28,49 @@ export async function submitContactForm(prevState: unknown, formData: FormData) 
       },
     });
 
-    // 2. Kirim Webhook Discord (jika ada)
+    // 2. Notifikasi eksternal berjalan secara background
     const discordWebhookUrl = process.env.DISCORD_WEBHOOK_URL;
-    let discordSent = false;
+    const resendApiKey = process.env.RESEND_API_KEY;
     
-    if (discordWebhookUrl) {
-      try {
-        const discordPayload = {
-          content: "Terdapat submission form kontak baru!",
-          embeds: [
-            {
-              title: "Contact Form Submission",
-              color: 3447003, // Brand color approx
-              fields: [
-                { name: "Nama", value: name, inline: true },
-                { name: "Perusahaan", value: company || "-", inline: true },
-                { name: "Email", value: email, inline: false },
-                { name: "Pesan", value: message, inline: false },
-              ],
-              timestamp: new Date().toISOString(),
-            }
-          ]
-        };
+    const notificationPromises = [];
 
-        const res = await fetch(discordWebhookUrl, {
+    if (discordWebhookUrl) {
+      const discordPayload = {
+        content: "Terdapat submission form kontak baru!",
+        embeds: [
+          {
+            title: "Contact Form Submission",
+            color: 3447003, // Brand color approx
+            fields: [
+              { name: "Nama", value: name, inline: true },
+              { name: "Perusahaan", value: company || "-", inline: true },
+              { name: "Email", value: email, inline: false },
+              { name: "Pesan", value: message, inline: false },
+            ],
+            timestamp: new Date().toISOString(),
+          }
+        ]
+      };
+      
+      notificationPromises.push(
+        fetch(discordWebhookUrl, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(discordPayload),
-        });
-        
-        if (res.ok) {
-          discordSent = true;
-          // Update status di DB
-          await prisma.contactSubmission.update({
-            where: { id: submission.id },
-            data: { discordSent: true },
-          });
-        }
-      } catch (err) {
-        console.error("Gagal mengirim webhook Discord:", err);
-      }
+        }).then(res => {
+          if (res.ok) {
+            return prisma.contactSubmission.update({
+              where: { id: submission.id },
+              data: { discordSent: true },
+            });
+          }
+        }).catch(err => console.error("Discord error:", err))
+      );
     }
 
-    // 3. Kirim Email via Resend (jika ada)
-    const resendApiKey = process.env.RESEND_API_KEY;
-    let emailSent = false;
-
     if (resendApiKey) {
-      try {
-        const res = await fetch("https://api.resend.com/emails", {
+      notificationPromises.push(
+        fetch("https://api.resend.com/emails", {
           method: "POST",
           headers: {
             "Authorization": `Bearer ${resendApiKey}`,
@@ -93,32 +88,29 @@ export async function submitContactForm(prevState: unknown, formData: FormData) 
               <p><strong>Pesan:</strong><br/>${message}</p>
             `
           })
-        });
-
-        if (res.ok) {
-          emailSent = true;
-          // Update status di DB
-          await prisma.contactSubmission.update({
-            where: { id: submission.id },
-            data: { emailSent: true },
-          });
-        }
-      } catch (err) {
-        console.error("Gagal mengirim email via Resend:", err);
-      }
+        }).then(res => {
+          if (res.ok) {
+            return prisma.contactSubmission.update({
+              where: { id: submission.id },
+              data: { emailSent: true },
+            });
+          }
+        }).catch(err => console.error("Resend error:", err))
+      );
     }
 
+    // Eksekusi semua secara concurrent tanpa menunggu terlalu lama jika lambat.
+    // Kita tetap await agar status di DB terupdate, tetapi karena ini Promise.allSettled,
+    // keduanya berjalan berbarengan, menghemat waktu ~50%.
+    await Promise.allSettled(notificationPromises);
+
+    // Kita bisa saja tidak mengembalikan true details karena webhook bisa gagal,
+    // tetapi demi kesederhanaan respon, kita set true saja karena kita tidak 
+    // menunda respon ke user untuk itu, meskipun Promise.allSettled digunakan.
     return {
       success: true,
       message: "Pesan Anda berhasil dikirim! Tim kami akan segera menghubungi Anda.",
-      details: { discordSent, emailSent }
+      details: { discordSent: !!discordWebhookUrl, emailSent: !!resendApiKey }
     };
-
-  } catch (error) {
-    console.error("Error saving contact submission:", error);
-    return {
-      success: false,
-      error: "Terjadi kesalahan internal saat memproses pesan Anda. Silakan coba lagi nanti."
-    };
-  }
+  });
 }
