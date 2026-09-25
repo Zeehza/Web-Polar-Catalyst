@@ -1,7 +1,5 @@
 import React from "react";
 import { prisma } from "@/lib/prisma";
-import { format } from "date-fns";
-import { id } from "date-fns/locale";
 import { Mail, Building2, User, Check, Trash2 } from "lucide-react";
 import { markMessageAsRead, deleteMessage } from "@/app/actions/message";
 
@@ -68,7 +66,7 @@ export default async function AdminPesanPage() {
                       </p>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-neutral-500">
-                      {format(new Date(msg.createdAt), "dd MMM yyyy, HH:mm", { locale: id })}
+                      {new Intl.DateTimeFormat('id-ID', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(msg.createdAt)).replace('.', ':')}
                     </td>
                     <td className="px-6 py-4 text-center">
                       <span className={`px-2.5 py-1 text-xs rounded-full font-medium ${

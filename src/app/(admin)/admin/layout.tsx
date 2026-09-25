@@ -33,14 +33,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         </nav>
 
         <div className="p-4 border-t border-neutral-200 dark:border-neutral-800">
-          <div className="flex items-center gap-3 px-3 py-2 mb-2">
-            <div className="h-8 w-8 rounded-full bg-brand-500 text-white flex items-center justify-center font-bold">
-              {session.user.name?.charAt(0).toUpperCase()}
-            </div>
-            <div className="text-sm font-semibold dark:text-white truncate">
-              {session.user.name}
-            </div>
-          </div>
+
           <form
             action={async () => {
               "use server";

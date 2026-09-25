@@ -1,7 +1,5 @@
 import React from "react";
 import { prisma } from "@/lib/prisma";
-import { format } from "date-fns";
-import { id } from "date-fns/locale";
 import { Trophy, Calendar, MapPin, Clock } from "lucide-react";
 
 export const metadata = {
@@ -120,11 +118,9 @@ export default async function JadwalPage() {
                     <div className="flex items-center gap-2 text-sm font-medium text-neutral-600 dark:text-neutral-400 bg-neutral-50 dark:bg-neutral-950 px-4 py-2 rounded-lg border border-neutral-100 dark:border-neutral-800">
                       <Clock className="h-4 w-4" />
                       <span>
-                        {format(new Date(tournament.startDate), "dd MMM yyyy", {
-                          locale: id,
-                        })}
+                        {new Intl.DateTimeFormat('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(tournament.startDate))}
                         {tournament.endDate &&
-                          ` - ${format(new Date(tournament.endDate), "dd MMM yyyy", { locale: id })}`}
+                          ` - ${new Intl.DateTimeFormat('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(tournament.endDate))}`}
                       </span>
                     </div>
                   </div>
@@ -212,11 +208,7 @@ export default async function JadwalPage() {
                                     <Clock className="h-3 w-3" />
                                     <span>
                                       {match.scheduledAt
-                                        ? format(
-                                            new Date(match.scheduledAt),
-                                            "dd MMM • HH:mm",
-                                            { locale: id },
-                                          )
+                                        ? new Intl.DateTimeFormat('id-ID', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }).format(new Date(match.scheduledAt)).replace(',', ' •').replace('.', ':')
                                         : "TBA"}
                                     </span>
                                   </div>

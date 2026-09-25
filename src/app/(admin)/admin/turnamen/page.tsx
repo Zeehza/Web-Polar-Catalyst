@@ -2,8 +2,6 @@ import React from "react";
 import { prisma } from "@/lib/prisma";
 import { Trophy, Plus } from "lucide-react";
 import Link from "next/link";
-import { format } from "date-fns";
-import { id } from "date-fns/locale";
 
 export const metadata = {
   title: "Turnamen | Admin Dashboard",
@@ -58,7 +56,7 @@ export default async function AdminTurnamenPage() {
                     <td className="px-6 py-4">
                       <p className="font-semibold text-neutral-900 dark:text-white">{t.name}</p>
                       <p className="text-xs text-neutral-400">
-                        {format(new Date(t.startDate), "dd MMM yyyy", { locale: id })}
+                        {new Intl.DateTimeFormat('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(t.startDate))}
                       </p>
                     </td>
                     <td className="px-6 py-4">

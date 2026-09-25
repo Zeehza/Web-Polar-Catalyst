@@ -82,6 +82,12 @@ export default function KontakPage() {
 
             {!state?.success && (
               <form action={formAction} className="flex flex-col gap-6">
+                {/* Honeypot field for anti-spam bots */}
+                <div className="sr-only" aria-hidden="true">
+                  <label htmlFor="website">Website</label>
+                  <input type="text" id="website" name="website" tabIndex={-1} autoComplete="off" />
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Nama */}
                   <div className="flex flex-col gap-2">

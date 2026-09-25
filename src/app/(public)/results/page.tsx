@@ -1,8 +1,6 @@
 import React from "react";
 import { prisma } from "@/lib/prisma";
 import { Trophy, Medal, Swords, Hash } from "lucide-react";
-import { format } from "date-fns";
-import { id } from "date-fns/locale";
 import { getLeaderboard } from "@/lib/tournament-utils";
 
 export const metadata = {
@@ -233,7 +231,7 @@ export default async function HasilPage() {
                               <div className="text-xs text-neutral-400 mb-3 flex justify-between items-center">
                                 <span>R{match.roundNumber} - M{match.matchOrder}</span>
                                 {match.playedAt && (
-                                  <span>{format(new Date(match.playedAt), "dd MMM yyyy", { locale: id })}</span>
+                                  <span>{new Intl.DateTimeFormat('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(match.playedAt))}</span>
                                 )}
                               </div>
                               
