@@ -84,7 +84,7 @@ export default async function AdminDashboardPage() {
           </div>
           <div>
             <p className="text-sm text-neutral-500 font-medium">
-              Total Tim Terdaftar
+              Total Fandom Participants
             </p>
             <p className="text-2xl font-bold text-neutral-900 dark:text-white">
               {totalTeams}
