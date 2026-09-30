@@ -30,7 +30,7 @@ export default async function AdminDashboardPage() {
           Dashboard Overview
         </h1>
         <p className="text-neutral-500 dark:text-neutral-400 mt-1">
-          Selamat datang di panel admin Polar Catalyst.
+          Selamat datang di dashboard admin Polar Catalyst.
         </p>
       </div>
 
