@@ -11,14 +11,16 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { FormWithToast, InnerButton } from "@/components/SubmitButton";
+import GroupSelect from "@/components/GroupSelect";
 import {
-  updateTournamentStatus,
+  updateTournamentInfo,
   addTeam,
   addMatch,
   updateMatchResult,
   deleteTeam,
   deleteMatch,
   deleteTournament,
+  updateTeamGroup,
 } from "@/app/actions/admin";
 import { redirect } from "next/navigation";
 
@@ -45,11 +47,12 @@ export default async function TournamentDetailPage({
 
   if (!tournament) return <div>Tournament not found</div>;
 
-  // Server action bind for status update
-  const handleStatusUpdate = async (formData: FormData) => {
+  // Server action bind for info update
+  const handleInfoUpdate = async (formData: FormData) => {
     "use server";
     const status = formData.get("status") as string;
-    await updateTournamentStatus(id, status);
+    const type = formData.get("type") as string;
+    await updateTournamentInfo(id, status, type);
   };
 
   // Server action bind for match update
@@ -81,6 +84,14 @@ export default async function TournamentDetailPage({
       status,
       scheduledAt,
     });
+  };
+
+  // Server action bind for group update
+  const handleTeamGroupUpdate = async (formData: FormData) => {
+    "use server";
+    const teamId = formData.get("teamId") as string;
+    const group = (formData.get("group") as string) || null;
+    await updateTeamGroup(teamId, group);
   };
 
   const formatDatetimeLocal = (date: Date | null) => {
@@ -127,33 +138,49 @@ export default async function TournamentDetailPage({
         </form>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left Column: General Info & Teams */}
-        <div className="lg:col-span-1 flex flex-col gap-8">
-          {/* Status Update */}
-          <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl p-6 shadow-sm">
-            <h2 className="text-lg font-bold mb-4 dark:text-white">
-              Status Turnamen
-            </h2>
-            <FormWithToast
-              action={handleStatusUpdate}
-              className="flex flex-col gap-4"
-              toastMessage="Status turnamen terupdate!"
-            >
-              <select
-                name="status"
-                defaultValue={tournament.status}
-                className="w-full px-4 py-2.5 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-xl outline-none dark:text-white"
+      <div className="flex flex-col gap-8">
+        {/* Top Section: General Info & Teams */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Info Turnamen */}
+          <div key={`info-${tournament.status}-${tournament.type}`} className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+            <div>
+              <h2 className="text-lg font-bold mb-4 dark:text-white">
+                Info Turnamen
+              </h2>
+              <FormWithToast
+                action={handleInfoUpdate}
+                className="flex flex-col gap-4"
+                toastMessage="Info turnamen terupdate!"
               >
-                <option value="UPCOMING">UPCOMING</option>
-                <option value="ONGOING">ONGOING</option>
-                <option value="COMPLETED">COMPLETED</option>
-                <option value="CANCELLED">CANCELLED</option>
-              </select>
-              <InnerButton className="w-full bg-brand-500 hover:bg-brand-600 text-white py-2.5 rounded-xl font-medium flex items-center justify-center gap-2">
-                <Save className="h-4 w-4" /> Update Status
-              </InnerButton>
-            </FormWithToast>
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-semibold text-neutral-700 dark:text-neutral-300">Status</label>
+                  <select
+                    name="status"
+                    defaultValue={tournament.status}
+                    className="w-full px-4 py-2.5 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-xl outline-none dark:text-white"
+                  >
+                    <option value="UPCOMING">UPCOMING</option>
+                    <option value="ONGOING">ONGOING</option>
+                    <option value="COMPLETED">COMPLETED</option>
+                    <option value="CANCELLED">CANCELLED</option>
+                  </select>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-semibold text-neutral-700 dark:text-neutral-300">Tipe</label>
+                  <select
+                    name="type"
+                    defaultValue={tournament.type}
+                    className="w-full px-4 py-2.5 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-xl outline-none dark:text-white"
+                  >
+                    <option value="GROUP_STAGE">Group Stage</option>
+                    <option value="PLAYOFF">Playoff</option>
+                  </select>
+                </div>
+                <InnerButton className="w-full bg-brand-500 hover:bg-brand-600 text-white py-2.5 rounded-xl font-medium flex items-center justify-center gap-2 mt-4">
+                  <Save className="h-4 w-4" /> Update Info
+                </InnerButton>
+              </FormWithToast>
+            </div>
           </div>
 
           {/* Manage Teams */}
@@ -192,7 +219,7 @@ export default async function TournamentDetailPage({
               </div>
               <button
                 type="submit"
-                className="bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-3 py-2 rounded-lg hover:opacity-80 transition-opacity flex items-center justify-center self-end h-21"
+                className="bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-3 py-2 rounded-lg hover:opacity-80 transition-opacity flex items-center justify-center self-end h-21.5"
               >
                 <Plus className="h-4 w-4" />
               </button>
@@ -223,23 +250,32 @@ export default async function TournamentDetailPage({
                             ?
                           </div>
                         )}
-                        <span>{team.name}</span>
+                        <span className="flex-1">{team.name}</span>
                       </div>
-                      <form
-                        action={async (formData) => {
-                          "use server";
-                          await deleteTeam(formData);
-                        }}
-                      >
-                        <input type="hidden" name="teamId" value={team.id} />
-                        <input type="hidden" name="tournamentId" value={id} />
-                        <button
-                          type="submit"
-                          className="text-red-500 opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"
+                      <div className="flex items-center gap-2">
+                        {tournament.type === "GROUP_STAGE" && (
+                          <GroupSelect
+                            teamId={team.id}
+                            defaultGroup={team.group || ""}
+                            action={handleTeamGroupUpdate}
+                          />
+                        )}
+                        <form
+                          action={async (formData) => {
+                            "use server";
+                            await deleteTeam(formData);
+                          }}
                         >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </form>
+                          <input type="hidden" name="teamId" value={team.id} />
+                          <input type="hidden" name="tournamentId" value={id} />
+                          <button
+                            type="submit"
+                            className="text-red-500 opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </form>
+                      </div>
                     </li>
                   ))}
                 </ul>
@@ -248,8 +284,8 @@ export default async function TournamentDetailPage({
           </div>
         </div>
 
-        {/* Right Column: Manage Matches */}
-        <div className="lg:col-span-2 flex flex-col gap-6">
+        {/* Bottom Section: Manage Matches */}
+        <div className="flex flex-col gap-6">
           <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl p-6 shadow-sm">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold dark:text-white flex items-center gap-2">
@@ -351,10 +387,11 @@ export default async function TournamentDetailPage({
                 </p>
               ) : (
                 tournament.matches.map((match) => (
-                  <div key={match.id} className="flex items-start gap-2">
+                  <div key={`${match.id}-${match.status}-${match.scoreA}-${match.scoreB}`} className="flex items-start gap-2">
                     <FormWithToast
                       action={handleMatchUpdate}
-                      className="flex-1 p-4 border border-neutral-100 dark:border-neutral-800 rounded-xl bg-white dark:bg-neutral-900 hover:border-brand-300 dark:hover:border-brand-700 transition-colors"
+                      wrapperClassName="flex-1 min-w-0"
+                      className="w-full p-4 border border-neutral-100 dark:border-neutral-800 rounded-xl bg-white dark:bg-neutral-900 hover:border-brand-300 dark:hover:border-brand-700 transition-colors flex flex-col"
                       toastMessage="Match diperbarui!"
                     >
                       <input type="hidden" name="matchId" value={match.id} />
@@ -377,7 +414,7 @@ export default async function TournamentDetailPage({
 
                         <div className="flex-1 flex items-center gap-2 min-w-0">
                           <span
-                            className={`text-sm font-semibold truncate flex-1 text-right ${match.winnerId === match.teamAId ? "text-brand-500" : "dark:text-white"}`}
+                            className={`text-sm font-semibold flex-1 text-right ${match.winnerId === match.teamAId ? "text-brand-500" : "dark:text-white"}`}
                           >
                             {match.teamA?.name || "TBD"}
                           </span>
@@ -397,7 +434,7 @@ export default async function TournamentDetailPage({
                             className="w-11 px-1 py-1 text-center text-sm rounded border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-950 dark:text-white outline-none shrink-0"
                           />
                           <span
-                            className={`text-sm font-semibold truncate flex-1 ${match.winnerId === match.teamBId ? "text-brand-500" : "dark:text-white"}`}
+                            className={`text-sm font-semibold flex-1 ${match.winnerId === match.teamBId ? "text-brand-500" : "dark:text-white"}`}
                           >
                             {match.teamB?.name || "TBD"}
                           </span>
@@ -405,13 +442,13 @@ export default async function TournamentDetailPage({
                       </div>
 
                       {/* Row 2: Controls */}
-                      <div className="flex items-center gap-2 pt-3 border-t border-neutral-100 dark:border-neutral-800">
+                      <div className="flex items-center justify-center gap-2 pt-3 border-t border-neutral-100 dark:border-neutral-800">
                         <input
                           type="datetime-local"
                           name="scheduledAt"
                           defaultValue={formatDatetimeLocal(match.scheduledAt)}
                           title="Waktu (Kosong = TBA)"
-                          className="flex-1 min-w-0 px-2 py-1 text-xs rounded border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-950 dark:text-white outline-none"
+                          className="w-auto px-2 py-1 text-xs rounded border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-950 dark:text-white outline-none"
                         />
                         <select
                           name="status"

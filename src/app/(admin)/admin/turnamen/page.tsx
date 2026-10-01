@@ -37,6 +37,7 @@ export default async function AdminTurnamenPage() {
                 <th className="px-6 py-4">Turnamen</th>
                 <th className="px-6 py-4">Game</th>
                 <th className="px-6 py-4">Status</th>
+                <th className="px-6 py-4">Tipe</th>
                 <th className="px-6 py-4 text-center">Tim</th>
                 <th className="px-6 py-4 text-center">Match</th>
                 <th className="px-6 py-4 text-right">Aksi</th>
@@ -71,6 +72,11 @@ export default async function AdminTurnamenPage() {
                         "bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300"
                       }`}>
                         {t.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 px-2 py-1 rounded-md text-xs font-medium">
+                        {t.type === "GROUP_STAGE" ? "Group Stage" : "Playoff"}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-center font-medium">{t._count.teams}</td>

@@ -25,6 +25,7 @@ model Tournament {
   slug        String    @unique
   description String?   
   game        String
+  type        String    @default("PLAYOFF") // GROUP_STAGE or PLAYOFF
   status      String    @default("DRAFT")
   bannerUrl   String?
   startDate   DateTime
@@ -48,6 +49,7 @@ model Team {
   logoUrl      String?
   tournamentId String
   seed         Int?
+  group        String?    // e.g., "A", "B", etc., for group stage
   status       String     @default("ACTIVE")
   createdAt    DateTime   @default(now())
 

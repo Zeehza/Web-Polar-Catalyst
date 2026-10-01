@@ -1,6 +1,7 @@
 import React from "react";
 import { prisma } from "@/lib/prisma";
 import { Trophy, Calendar, MapPin, Clock } from "lucide-react";
+import { getGroupLeaderboards } from "@/lib/tournament-utils";
 
 export const metadata = {
   title: "Events | Polar Catalyst",
@@ -104,6 +105,9 @@ export default async function JadwalPage() {
                           <MapPin className="h-3 w-3" />
                           {tournament.game}
                         </span>
+                        <span className="text-sm font-medium text-neutral-500 dark:text-neutral-400 flex items-center gap-1 border-l border-neutral-300 dark:border-neutral-700 pl-3">
+                          {tournament.type === "GROUP_STAGE" ? "Group Stage" : "Playoff"}
+                        </span>
                       </div>
                       <h2 className="text-2xl font-bold text-neutral-900 dark:text-white">
                         {tournament.name}
@@ -127,8 +131,27 @@ export default async function JadwalPage() {
 
                   {tournament.status === "ONGOING" && (
                     <>
-                      {/* Teams List (MPL Style) */}
-                      {tournament.teams && tournament.teams.length > 0 && (
+                      {/* Teams List (MPL Style) — only show qualified teams */}
+                      {(() => {
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        let displayTeams: any[] = [];
+
+                        if (tournament.type === "PLAYOFF") {
+                          // Playoff: semua tim ditampilkan
+                          displayTeams = tournament.teams || [];
+                        } else {
+                          // Group Stage: hanya top 1 & 2 per grup
+                          const groupLeaderboards = getGroupLeaderboards(tournament.teams, tournament.matches);
+                          const qualifiedIds = new Set<string>();
+                          for (const [, lb] of groupLeaderboards) {
+                            (lb as any[]).slice(0, 2).forEach((t: any) => qualifiedIds.add(t.id)); // eslint-disable-line @typescript-eslint/no-explicit-any
+                          }
+                          displayTeams = (tournament.teams || []).filter((t: any) => qualifiedIds.has(t.id)); // eslint-disable-line @typescript-eslint/no-explicit-any
+                        }
+
+                        if (displayTeams.length === 0) return null;
+
+                        return (
                         <div className="flex flex-col gap-6 py-6 border-b border-neutral-200 dark:border-neutral-800">
                           <h3
                             className="text-2xl font-bold text-center text-neutral-900 dark:text-white uppercase tracking-[0.2em] opacity-80"
@@ -136,10 +159,10 @@ export default async function JadwalPage() {
                               fontFamily: 'Impact, "Arial Black", sans-serif',
                             }}
                           >
-                            TIM
+                            {tournament.type === "GROUP_STAGE" ? "TOP TEAMS" : "TIM"}
                           </h3>
                           <div className="flex flex-wrap justify-center gap-4 md:gap-6">
-                            {tournament.teams.map(
+                            {displayTeams.map(
                               (
                                 team: any /* eslint-disable-line @typescript-eslint/no-explicit-any */,
                               ) => (
@@ -180,18 +203,23 @@ export default async function JadwalPage() {
                             )}
                           </div>
                         </div>
-                      )}
+                        );
+                      })()}
 
-                      {/* Matches List */}
-                      {tournament.matches.length === 0 ? (
-                        <div className="text-center py-12 bg-white/50 dark:bg-neutral-900/50 rounded-2xl border border-dashed border-neutral-300 dark:border-neutral-700">
-                          <p className="text-neutral-500 dark:text-neutral-400">
-                            Jadwal match belum ditentukan untuk turnamen ini.
-                          </p>
-                        </div>
-                      ) : (
+                      {/* Matches List — hide completed */}
+                      {(() => {
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        const upcomingMatches = tournament.matches.filter((m: any) => m.status !== "COMPLETED");
+                        if (upcomingMatches.length === 0) return (
+                          <div className="text-center py-12 bg-white/50 dark:bg-neutral-900/50 rounded-2xl border border-dashed border-neutral-300 dark:border-neutral-700">
+                            <p className="text-neutral-500 dark:text-neutral-400">
+                              Tidak ada jadwal match yang akan datang.
+                            </p>
+                          </div>
+                        );
+                        return (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          {tournament.matches.map(
+                          {upcomingMatches.map(
                             (
                               match: any /* eslint-disable-line @typescript-eslint/no-explicit-any */,
                             ) => (
@@ -276,7 +304,8 @@ export default async function JadwalPage() {
                             ),
                           )}
                         </div>
-                      )}
+                        );
+                      })()}
                     </>
                   )}
                 </div>

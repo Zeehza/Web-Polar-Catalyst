@@ -68,6 +68,21 @@ export default function BuatTurnamenPage() {
           </div>
 
           <div className="flex flex-col gap-2">
+            <label htmlFor="type" className="text-sm font-semibold text-neutral-700 dark:text-neutral-300">
+              Tipe Turnamen
+            </label>
+            <select
+              id="type"
+              name="type"
+              defaultValue="PLAYOFF"
+              className="w-full px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none transition-all dark:text-white"
+            >
+              <option value="GROUP_STAGE">Group Stage</option>
+              <option value="PLAYOFF">Playoff</option>
+            </select>
+          </div>
+
+          <div className="flex flex-col gap-2">
             <label htmlFor="startDate" className="text-sm font-semibold text-neutral-700 dark:text-neutral-300">
               Tanggal Mulai *
             </label>

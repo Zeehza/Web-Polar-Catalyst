@@ -8,6 +8,7 @@ export async function createTournament(prevState: unknown, formData: FormData) {
   return withAdminActionError("creating tournament", "Gagal membuat turnamen.", async () => {
     const name = formData.get("name") as string;
     const game = formData.get("game") as string;
+    const type = (formData.get("type") as string) || "PLAYOFF";
     const startDateStr = formData.get("startDate") as string;
     
     if (!name || !game || !startDateStr) {
@@ -21,6 +22,7 @@ export async function createTournament(prevState: unknown, formData: FormData) {
         name,
         slug,
         game,
+        type,
         startDate: new Date(startDateStr),
         status: "DRAFT",
       },
@@ -32,11 +34,11 @@ export async function createTournament(prevState: unknown, formData: FormData) {
   });
 }
 
-export async function updateTournamentStatus(id: string, status: string) {
-  return withAdminActionError("updating tournament status", "Gagal mengubah status turnamen.", async () => {
+export async function updateTournamentInfo(id: string, status: string, type: string) {
+  return withAdminActionError("updating tournament info", "Gagal mengubah info turnamen.", async () => {
     await prisma.tournament.update({
       where: { id },
-      data: { status },
+      data: { status, type },
     });
     revalidatePath(`/admin/turnamen/${id}`);
     revalidatePath("/events");
@@ -50,6 +52,7 @@ export async function addTeam(formData: FormData) {
     const name = formData.get("name") as string;
     const tournamentId = formData.get("tournamentId") as string;
     const logoUrl = formData.get("logoUrl") as string;
+    const group = (formData.get("group") as string) || null;
 
     if (!name || !tournamentId) {
       return { success: false, error: "Nama tim wajib diisi." };
@@ -60,6 +63,7 @@ export async function addTeam(formData: FormData) {
         name,
         tournamentId,
         logoUrl: logoUrl || null,
+        group,
       },
     });
 
@@ -130,6 +134,21 @@ export async function updateMatchResult(matchId: string, data: {
     revalidatePath(`/admin/turnamen/${match.tournamentId}`);
     revalidatePath("/events");
     revalidatePath("/results");
+    return { success: true };
+  });
+}
+
+export async function updateTeamGroup(teamId: string, group: string | null) {
+  return withAdminActionError("updating team group", "Gagal memperbarui grup tim.", async () => {
+    const team = await prisma.team.findUnique({ where: { id: teamId } });
+    if (!team) throw new Error("Team not found");
+
+    await prisma.team.update({
+      where: { id: teamId },
+      data: { group },
+    });
+
+    revalidatePath(`/admin/turnamen/${team.tournamentId}`);
     return { success: true };
   });
 }

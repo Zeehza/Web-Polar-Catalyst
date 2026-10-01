@@ -20,11 +20,13 @@ export function FormWithToast({
   action,
   children,
   className,
+  wrapperClassName,
   toastMessage = "Berhasil diperbarui!",
 }: {
   action: (formData: FormData) => Promise<void>;
   children: React.ReactNode;
   className?: string;
+  wrapperClassName?: string;
   toastMessage?: string;
 }) {
   const toastRef = useRef<HTMLDivElement>(null);
@@ -44,7 +46,7 @@ export function FormWithToast({
   };
 
   return (
-    <div className="relative">
+    <div className={`relative ${wrapperClassName || ""}`}>
       <form action={handleAction} className={className}>
         {children}
       </form>
