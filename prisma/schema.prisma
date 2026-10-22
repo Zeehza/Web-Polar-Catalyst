@@ -22,6 +22,7 @@ model Admin {
 model Tournament {
   id          String    @id @default(cuid())
   name        String
+  season      String    @default("Season 1")
   slug        String    @unique
   description String?   
   game        String
@@ -39,6 +40,8 @@ model Tournament {
 
   // Indexes
   @@index([status])
+  @@index([name])
+  @@unique([name, season])
   @@map("tournaments")
 }
 

@@ -6,8 +6,9 @@ import { withAdminActionError } from "@/lib/action-utils";
 
 export async function createTournament(prevState: unknown, formData: FormData) {
   return withAdminActionError("creating tournament", "Gagal membuat turnamen.", async () => {
-    const name = formData.get("name") as string;
-    const game = formData.get("game") as string;
+    const name = (formData.get("name") as string)?.trim();
+    const season = ((formData.get("season") as string) || "Season 1").trim();
+    const game = (formData.get("game") as string)?.trim();
     const type = (formData.get("type") as string) || "PLAYOFF";
     const startDateStr = formData.get("startDate") as string;
     
@@ -15,32 +16,104 @@ export async function createTournament(prevState: unknown, formData: FormData) {
       return { success: false, error: "Nama, Game, dan Tanggal Mulai wajib diisi." };
     }
 
-    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-") + "-" + Date.now();
+    const startDate = new Date(startDateStr);
+    if (isNaN(startDate.getTime())) {
+      return { success: false, error: "Format Tanggal Mulai tidak valid." };
+    }
 
-    await prisma.tournament.create({
-      data: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const existing = await (prisma.tournament as any).findFirst({
+      where: {
         name,
-        slug,
-        game,
-        type,
-        startDate: new Date(startDateStr),
-        status: "DRAFT",
+        season,
       },
     });
 
-    revalidatePath("/admin/turnamen");
-    revalidatePath("/events");
-    return { success: true, redirect: "/admin/turnamen" };
+    if (existing) {
+      return {
+        success: false,
+        error: `Turnamen "${name}" dengan ${season} sudah ada. Silakan gunakan nama season lain (misal: Season 2).`,
+      };
+    }
+
+    const slug = `${name}-${season}`.toLowerCase().replace(/[^a-z0-9]+/g, "-") + "-" + Date.now();
+
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const created = await (prisma.tournament.create as any)({
+        data: {
+          name,
+          season,
+          slug,
+          game,
+          type,
+          startDate,
+          status: "DRAFT",
+        },
+      });
+
+      revalidatePath("/admin/turnamen");
+      revalidatePath("/events");
+      revalidatePath("/results");
+      return { success: true, redirect: `/admin/turnamen/${created.id}` };
+    } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+      if (error?.code === "P2002") {
+        return {
+          success: false,
+          error: `Turnamen "${name}" dengan ${season} sudah ada di database. Silakan gunakan label season lain (misal: Season 2).`,
+        };
+      }
+      throw error;
+    }
   });
 }
 
-export async function updateTournamentInfo(id: string, status: string, type: string) {
+export async function updateTournamentInfo(
+  id: string,
+  statusOrData: string | { status: string; type: string; name?: string; season?: string; description?: string | null },
+  typeArg?: string
+) {
   return withAdminActionError("updating tournament info", "Gagal mengubah info turnamen.", async () => {
-    await prisma.tournament.update({
+    let status: string;
+    let type: string;
+    let name: string | undefined;
+    let season: string | undefined;
+    let description: string | null | undefined;
+
+    if (typeof statusOrData === "object") {
+      status = statusOrData.status;
+      type = statusOrData.type;
+      name = statusOrData.name?.trim();
+      season = statusOrData.season?.trim();
+      description = statusOrData.description;
+    } else {
+      status = statusOrData;
+      type = typeArg || "PLAYOFF";
+    }
+
+    if (name && season) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const existing = await (prisma.tournament as any).findFirst({
+        where: { name, season },
+      });
+      if (existing && existing.id !== id) {
+        return { success: false, error: `Turnamen "${name}" dengan ${season} sudah ada.` };
+      }
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (prisma.tournament.update as any)({
       where: { id },
-      data: { status, type },
+      data: {
+        status,
+        type,
+        ...(name ? { name } : {}),
+        ...(season ? { season } : {}),
+        ...(description !== undefined ? { description } : {}),
+      },
     });
     revalidatePath(`/admin/turnamen/${id}`);
+    revalidatePath("/admin/turnamen");
     revalidatePath("/events");
     revalidatePath("/results");
     return { success: true };
@@ -73,10 +146,10 @@ export async function addTeam(formData: FormData) {
 }
 
 export async function addMatch(formData: FormData) {
-  return withAdminActionError("adding match", "Gagal menambahkan match (pastikan Round & Order unik).", async () => {
+  return withAdminActionError("adding match", "Gagal menambahkan match (pastikan Match & Game unik).", async () => {
     const tournamentId = formData.get("tournamentId") as string;
-    const roundNumber = parseInt(formData.get("roundNumber") as string);
     const matchOrder = parseInt(formData.get("matchOrder") as string);
+    const roundNumber = parseInt(formData.get("roundNumber") as string);
     const teamAId = formData.get("teamAId") as string || null;
     const teamBId = formData.get("teamBId") as string || null;
     const scheduledAtStr = formData.get("scheduledAt") as string;
@@ -84,8 +157,8 @@ export async function addMatch(formData: FormData) {
     await prisma.match.create({
       data: {
         tournamentId,
-        roundNumber,
         matchOrder,
+        roundNumber,
         teamAId,
         teamBId,
         scheduledAt: scheduledAtStr ? new Date(scheduledAtStr) : null,
@@ -95,7 +168,7 @@ export async function addMatch(formData: FormData) {
 
     revalidatePath(`/admin/turnamen/${tournamentId}`);
     revalidatePath("/events");
-    return { success: true, message: "Match berhasil ditambahkan." };
+    return { success: true, message: "Match & Game berhasil ditambahkan." };
   });
 }
 
@@ -109,15 +182,6 @@ export async function updateMatchResult(matchId: string, data: {
   return withAdminActionError("updating match", "Gagal memperbarui match.", async () => {
     const match = await prisma.match.findUnique({ where: { id: matchId } });
     if (!match) throw new Error("Match not found");
-
-    if (data.status === "COMPLETED" && data.scoreA !== null && data.scoreB !== null) {
-      if (data.scoreA > data.scoreB && data.winnerId !== match.teamAId) {
-        throw new Error("Score mismatch: Team A has higher score but is not the winner.");
-      }
-      if (data.scoreB > data.scoreA && data.winnerId !== match.teamBId) {
-        throw new Error("Score mismatch: Team B has higher score but is not the winner.");
-      }
-    }
 
     await prisma.match.update({
       where: { id: matchId },

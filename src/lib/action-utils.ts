@@ -7,9 +7,9 @@ export async function withActionError<T>(
 ): Promise<T | { success: false; error: string }> {
   try {
     return await fn();
-  } catch (error) {
+  } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
     console.error(`Error ${actionName}:`, error);
-    return { success: false, error: errorMessage };
+    return { success: false, error: error?.message ? `${errorMessage} (${error.message})` : errorMessage };
   }
 }
 
@@ -25,9 +25,9 @@ export async function withAdminActionError<T>(
       return { success: false, error: "Unauthorized access" };
     }
     return await fn();
-  } catch (error) {
+  } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
     console.error(`Error ${actionName}:`, error);
-    return { success: false, error: errorMessage };
+    return { success: false, error: error?.message ? `${errorMessage} (${error.message})` : errorMessage };
   }
 }
 
