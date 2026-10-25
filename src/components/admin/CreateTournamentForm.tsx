@@ -204,7 +204,7 @@ export default function CreateTournamentForm({
                 onChange={(e) => setName(e.target.value)}
                 required
                 className="w-full px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none transition-all dark:text-white"
-                placeholder="Contoh: Polar Catalyst Valorant Cup"
+                placeholder="Masukkan nama turnamen"
               />
               <p className="text-xs text-neutral-500">
                 Nama tetap acara turnamen esports (nama ini dapat memiliki banyak season di dalamnya).
@@ -223,7 +223,7 @@ export default function CreateTournamentForm({
                 onChange={(e) => setGame(e.target.value)}
                 required
                 className="w-full px-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none transition-all dark:text-white"
-                placeholder="Contoh: Mobile Legend, Valorant, Dota 2"
+                placeholder="Masukkan nama game"
               />
             </div>
           </>
@@ -250,7 +250,7 @@ export default function CreateTournamentForm({
                 ? "border-amber-500 focus:border-amber-500"
                 : "border-neutral-200 dark:border-neutral-800"
             }`}
-            placeholder="Contoh: Season 1"
+            placeholder="Masukkan label season"
           />
           {isDuplicateSeason && (
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl text-amber-700 dark:text-amber-400 text-xs">

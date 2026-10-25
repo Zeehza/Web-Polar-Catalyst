@@ -94,7 +94,7 @@ export default function TournamentResultGroup({
               }`}
             >
               <GitCommit className="h-4 w-4" />
-              Bagan Bracket (Playoff Tree)
+              Bagan Bracket
             </button>
             <button
               type="button"

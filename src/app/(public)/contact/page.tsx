@@ -106,7 +106,7 @@ export default function KontakPage() {
                         id="name"
                         name="name"
                         required
-                        placeholder="Nama Pengirim"
+                        placeholder="Masukkan nama lengkap"
                         className="w-full pl-11 pr-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all dark:text-white"
                       />
                     </div>
@@ -128,7 +128,7 @@ export default function KontakPage() {
                         type="text"
                         id="company"
                         name="company"
-                        placeholder="Opsional"
+                        placeholder="Nama perusahaan atau organisasi (opsional)"
                         className="w-full pl-11 pr-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all dark:text-white"
                       />
                     </div>
@@ -152,7 +152,7 @@ export default function KontakPage() {
                       id="email"
                       name="email"
                       required
-                      placeholder="Polar@Catalyst.com"
+                      placeholder="Masukkan alamat email"
                       className="w-full pl-11 pr-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all dark:text-white"
                     />
                   </div>
@@ -171,7 +171,7 @@ export default function KontakPage() {
                     name="message"
                     required
                     rows={5}
-                    placeholder="Pesan yang ingin disampaikan"
+                    placeholder="Tulis pesan atau penawaran Anda di sini..."
                     className="w-full p-4 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all dark:text-white resize-y"
                   ></textarea>
                 </div>

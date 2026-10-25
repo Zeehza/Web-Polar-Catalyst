@@ -38,7 +38,6 @@ interface TournamentBracketProps {
 
 export default function TournamentBracket({
   matches,
-  tournamentName,
   championName,
 }: TournamentBracketProps) {
   const [hoveredTeamId, setHoveredTeamId] = useState<string | null>(null);
@@ -185,15 +184,43 @@ export default function TournamentBracket({
 
         // Partition Lower Bracket into rounds
         const lRounds: Array<{ title: string; series: MatchSeries[] }> = [];
-        if (lowerList.length >= 5) {
-          // 8-team lower bracket: M7 (R1), M8-M9 (R2), M11 (Semi), M12 (Final)
-          lRounds.push({ title: "Lower Round 1", series: lowerList.slice(0, 1) });
-          lRounds.push({ title: "Lower Round 2", series: lowerList.slice(1, 3) });
-          lRounds.push({ title: "Lower Semifinal", series: lowerList.slice(3, 4) });
-          lRounds.push({ title: "Lower Final", series: lowerList.slice(4) });
+
+        if (upperList.length >= 8 || lowerList.length >= 7) {
+          // 16-team lower bracket: 4 -> 4 -> 2 -> 2 -> 1 -> 1
+          const r1 = lowerList.slice(0, 4);
+          const r2 = lowerList.slice(4, 8);
+          const r3 = lowerList.slice(8, 10);
+          const r4 = lowerList.slice(10, 12);
+          const semi = lowerList.slice(12, 13);
+          const final = lowerList.slice(13);
+
+          if (r1.length > 0) lRounds.push({ title: "Lower Round 1", series: r1 });
+          if (r2.length > 0) lRounds.push({ title: "Lower Round 2", series: r2 });
+          if (r3.length > 0) lRounds.push({ title: "Lower Round 3", series: r3 });
+          if (r4.length > 0) lRounds.push({ title: "Lower Round 4", series: r4 });
+          if (semi.length > 0) lRounds.push({ title: "Lower Semifinal", series: semi });
+          if (final.length > 0) lRounds.push({ title: "Lower Final", series: final });
+        } else if (upperList.length >= 4 || lowerList.length >= 3) {
+          // 8-team lower bracket:
+          // Lower R1: 2 matches (losers of Upper R1: M7, M8)
+          // Lower R2: 2 matches (winners of Lower R1 vs losers of Upper Semi: M9, M10)
+          // Lower Semifinal: 1 match (winners of Lower R2: M12)
+          // Lower Final: 1 match (winner of Lower Semi vs loser of Upper Final: M13)
+          const r1 = lowerList.slice(0, 2);
+          const r2 = lowerList.slice(2, 4);
+          const semi = lowerList.slice(4, 5);
+          const final = lowerList.slice(5);
+
+          if (r1.length > 0) lRounds.push({ title: "Lower Round 1", series: r1 });
+          if (r2.length > 0) lRounds.push({ title: "Lower Round 2", series: r2 });
+          if (semi.length > 0) lRounds.push({ title: "Lower Semifinal", series: semi });
+          if (final.length > 0) lRounds.push({ title: "Lower Final", series: final });
         } else if (lowerList.length >= 2) {
-          lRounds.push({ title: "Lower Semifinal", series: lowerList.slice(0, lowerList.length - 1) });
-          lRounds.push({ title: "Lower Final", series: lowerList.slice(lowerList.length - 1) });
+          // 4-team lower bracket: 1 -> 1
+          lRounds.push({ title: "Lower Semifinal", series: lowerList.slice(0, 1) });
+          lRounds.push({ title: "Lower Final", series: lowerList.slice(1) });
+        } else if (lowerList.length === 1) {
+          lRounds.push({ title: "Lower Semifinal", series: lowerList });
         } else {
           lRounds.push({ title: "Lower Bracket", series: lowerList });
         }
@@ -401,27 +428,27 @@ export default function TournamentBracket({
       {/* Header Info */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-neutral-50 dark:bg-neutral-950 rounded-2xl border border-neutral-200 dark:border-neutral-800">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-brand-500/10 text-brand-600 dark:text-brand-400 rounded-xl">
+          <div className="p-2.5 bg-brand-500/10 text-brand-600 dark:text-brand-400 rounded-xl shrink-0">
             <GitCommit className="h-5 w-5" />
           </div>
-          <div>
-            <h4 className="text-base font-bold text-neutral-900 dark:text-white flex items-center gap-2">
-              Bagan Bracket Playoff
-              {tournamentName && <span className="text-neutral-400 font-normal">({tournamentName})</span>}
-            </h4>
-            <p className="text-xs text-neutral-500">
-              Format:{" "}
-              <strong className="text-neutral-700 dark:text-neutral-300">
-                {isDoubleElimination ? "Double Elimination (Gugur Ganda)" : "Single Elimination (Gugur Tunggal)"}
-              </strong>
-              {" • "}Sorot nama tim untuk melihat jejak perjalanan di bagan.
+          <div className="flex flex-col gap-0.5">
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <h4 className="text-base font-bold text-neutral-900 dark:text-white">
+                Bagan Playoff
+              </h4>
+              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 border border-neutral-200 dark:border-neutral-700">
+                {isDoubleElimination ? "Double Elimination" : "Single Elimination"}
+              </span>
+            </div>
+            <p className="text-xs text-neutral-500 dark:text-neutral-400">
+              Sorot nama tim untuk melihat alur bagan
             </p>
           </div>
         </div>
 
         {championName && (
-          <div className="flex items-center gap-2 px-3.5 py-1.5 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-xl text-amber-900 dark:text-amber-200 text-xs font-bold self-start sm:self-auto shadow-xs">
-            <Trophy className="h-4 w-4 text-amber-500" />
+          <div className="flex items-center gap-2 px-3.5 py-1.5 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-xl text-amber-900 dark:text-amber-200 text-xs font-bold self-start sm:self-auto shadow-xs shrink-0">
+            <Trophy className="h-4 w-4 text-amber-500 shrink-0" />
             <span>Juara: {championName}</span>
           </div>
         )}
@@ -439,7 +466,7 @@ export default function TournamentBracket({
               <div className="flex items-center gap-2">
                 <div className="h-4 w-1 bg-brand-500 rounded-full" />
                 <h5 className="text-sm font-bold text-neutral-800 dark:text-neutral-200 uppercase tracking-wider">
-                  Upper Bracket (Bracket Pemenang)
+                  Upper Bracket
                 </h5>
               </div>
 
@@ -487,7 +514,7 @@ export default function TournamentBracket({
               <div className="flex items-center gap-2">
                 <div className="h-4 w-1 bg-amber-500 rounded-full" />
                 <h5 className="text-sm font-bold text-neutral-800 dark:text-neutral-200 uppercase tracking-wider">
-                  Lower Bracket (Bracket Eliminasi)
+                  Lower Bracket
                 </h5>
               </div>
 

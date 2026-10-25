@@ -57,7 +57,7 @@ export default function LoginPage() {
                 name="password"
                 required
                 className="w-full pl-11 pr-4 py-3 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none transition-all dark:text-white"
-                placeholder="••••••••"
+                placeholder="Masukkan password"
               />
             </div>
           </div>

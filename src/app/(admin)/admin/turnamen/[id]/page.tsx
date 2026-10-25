@@ -242,6 +242,7 @@ export default async function TournamentDetailPage({
                     type="text"
                     name="name"
                     defaultValue={tournament.name}
+                    placeholder="Masukkan nama turnamen"
                     required
                     className="w-full px-4 py-2.5 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-xl outline-none dark:text-white"
                   />
@@ -255,7 +256,7 @@ export default async function TournamentDetailPage({
                     name="season"
                     defaultValue={tournament.season}
                     required
-                    placeholder="Contoh: Season 1"
+                    placeholder="Masukkan label season"
                     className="w-full px-4 py-2.5 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-xl outline-none dark:text-white font-medium"
                   />
                 </div>
@@ -314,14 +315,14 @@ export default async function TournamentDetailPage({
                 <input
                   type="text"
                   name="name"
-                  placeholder="Nama tim baru..."
+                  placeholder="Masukkan nama tim"
                   required
                   className="px-3 py-2 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-lg outline-none text-sm dark:text-white"
                 />
                 <input
                   type="url"
                   name="logoUrl"
-                  placeholder="URL Logo (Opsional)"
+                  placeholder="URL logo tim (opsional)"
                   className="px-3 py-2 bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-lg outline-none text-sm dark:text-white"
                 />
               </div>
