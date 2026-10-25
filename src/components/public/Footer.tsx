@@ -10,7 +10,7 @@ export function Footer() {
           <div className="flex flex-col items-center gap-2 md:items-start">
             <Link href="/" className="flex items-center gap-2">
               <Image
-                src="/polar catalyst.svg"
+                src="/polar-catalyst.svg"
                 alt="Polar Catalyst"
                 width={28}
                 height={28}
