@@ -16,6 +16,10 @@ export async function createTournament(prevState: unknown, formData: FormData) {
       return { success: false, error: "Nama, Game, dan Tanggal Mulai wajib diisi." };
     }
 
+    if (name.length > 100 || season.length > 50 || game.length > 100) {
+      return { success: false, error: "Panjang karakter Nama (maks 100), Season (maks 50), atau Game (maks 100) melampaui batas." };
+    }
+
     const startDate = new Date(startDateStr);
     if (isNaN(startDate.getTime())) {
       return { success: false, error: "Format Tanggal Mulai tidak valid." };
@@ -91,6 +95,16 @@ export async function updateTournamentInfo(
       type = typeArg || "PLAYOFF";
     }
 
+    if (name && name.length > 100) {
+      return { success: false, error: "Nama turnamen maksimal 100 karakter." };
+    }
+    if (season && season.length > 50) {
+      return { success: false, error: "Label season maksimal 50 karakter." };
+    }
+    if (description && description.length > 2000) {
+      return { success: false, error: "Deskripsi turnamen maksimal 2000 karakter." };
+    }
+
     if (name && season) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const existing = await (prisma.tournament as any).findFirst({
@@ -129,6 +143,13 @@ export async function addTeam(formData: FormData) {
 
     if (!name || !tournamentId) {
       return { success: false, error: "Nama tim wajib diisi." };
+    }
+
+    if (name.length > 100) {
+      return { success: false, error: "Nama tim maksimal 100 karakter." };
+    }
+    if (logoUrl && logoUrl.length > 500) {
+      return { success: false, error: "URL logo maksimal 500 karakter." };
     }
 
     await prisma.team.create({

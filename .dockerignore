@@ -6,3 +6,11 @@ README.md
 .next
 .git
 .env
+.env*.local
+*.db
+*.db-journal
+*.sqlite
+*.sqlite-journal
+prisma/*.db
+prisma/*.sqlite
+

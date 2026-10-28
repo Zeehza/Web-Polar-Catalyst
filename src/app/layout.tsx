@@ -8,6 +8,9 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Polar Catalyst",
   description: "Official online presence of Polar Catalyst",
+  other: {
+    "darkreader-lock": "",
+  },
 };
 
 export default function RootLayout({
@@ -17,6 +20,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <meta name="darkreader-lock" />
+      </head>
       <body
         className={`${inter.className} min-h-screen antialiased bg-white text-neutral-900 dark:bg-neutral-950 dark:text-neutral-50 flex flex-col`}
         suppressHydrationWarning
